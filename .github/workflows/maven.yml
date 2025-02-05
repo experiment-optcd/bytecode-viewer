@@ -7,31 +7,31 @@ jobs:
     strategy:
       matrix:
         java:
-        - '8'
-        - '11'
-        - '17'
-        - '21'
+          - '8'
+          - '11'
+          - '17'
+          - '21'
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK ${{ matrix.java }}
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: temurin
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Extract Maven project version
-      run: echo "bcv_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}'
-        --non-recursive exec:exec)" >> $GITHUB_ENV
-      id: project
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Bytecode-Viewer-${{ env.bcv_version }}-SNAPSHOT
-        path: target/Bytecode-Viewer-${{ env.bcv_version }}.jar
-        retention-days: 90
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml "-Dmaven.compiler.generateSources=false"
+      - name: Extract Maven project version
+        run: echo "bcv_version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}'
+          --non-recursive exec:exec)" >> $GITHUB_ENV
+        id: project
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bytecode-Viewer-${{ env.bcv_version }}-SNAPSHOT
+          path: target/Bytecode-Viewer-${{ env.bcv_version }}.jar
+          retention-days: 90
     name: build (${{ matrix.java }})
 'on':
-- push
-- workflow_dispatch
+  - push
+  - workflow_dispatch
